@@ -1,0 +1,14 @@
+{
+  "name": "tense-table",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A notebook-style drill for the 3x3 table of English tenses.",
+  "scripts": {
+    "test": "node --test",
+    "build": "node build.js",
+    "icons": "node tools/make-icons.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
