@@ -1,0 +1,1313 @@
+/*
+ * A squared school notebook: printed labels, blue ballpoint for the student's
+ * writing, red and green pens for the teacher. Everything sits on the --u grid.
+ */
+:root {
+  --u: 24px;
+  --paper: #f6f8fc;
+  --grid: #cdd9ee;
+  --grid-strong: #a9bcdd;
+  --margin: #e79aa3;
+  --ink: #26349b;
+  --ink-deep: #1b2678;
+  --ink-faint: #a9b1dc;
+  --graphite: #1f232b;
+  --pencil: #4a505d;
+  --red: #d4283a;
+  --green: #17845a;
+  --marker: #ffe45c;
+  --board: #2b5547;
+  --lift: rgba(255, 255, 255, 0.66);
+  --hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+  --print: "PT Serif", Georgia, "Times New Roman", serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  /* No pull-to-refresh: it would throw away a lesson in progress. */
+  overscroll-behavior-y: none;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  -webkit-tap-highlight-color: transparent;
+  background: var(--board);
+  color: var(--graphite);
+  font: 400 16px/var(--u) var(--print);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* ---------- sheet ---------- */
+
+.sheet {
+  position: relative;
+  width: min(100% - var(--u) * 2, var(--u) * 41);
+  min-height: calc(100vh - var(--u) * 4);
+  min-height: calc(100dvh - var(--u) * 4);
+  margin: calc(var(--u) * 2) auto;
+  /* --kb is the height of the on-screen keyboard, set from app.js. */
+  padding: var(--u) calc(var(--u) * 2) calc(var(--u) * 3 + var(--kb, 0px)) calc(var(--u) * 5);
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: var(--u) var(--u);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25), 0 24px 48px rgba(0, 0, 0, 0.35);
+}
+
+.sheet::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--u) * 4 - 1px);
+  width: 2px;
+  background: var(--margin);
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--u);
+  min-height: calc(var(--u) * 2);
+  margin-bottom: var(--u);
+}
+
+.cover-label {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: 700 12px/var(--u) var(--print);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  min-height: calc(var(--u) * 2);
+}
+
+.toggles {
+  display: flex;
+  gap: var(--u);
+}
+
+.toggle {
+  min-height: calc(var(--u) * 2);
+  padding: 0;
+  border: 0;
+  background: none;
+  font: 400 13px/var(--u) var(--print);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.toggle[aria-pressed="false"] {
+  color: var(--pencil);
+  text-decoration: line-through;
+}
+
+/* ---------- shared type ---------- */
+
+.title {
+  margin: 0 0 var(--u);
+  color: var(--ink);
+  font: 700 clamp(46px, 9vw, 76px) / calc(var(--u) * 3) var(--hand);
+  transform: rotate(-1.2deg);
+  transform-origin: left bottom;
+}
+
+.lead {
+  max-width: 62ch;
+  margin: 0 0 var(--u);
+  font-size: 17px;
+}
+
+.eyebrow,
+.section-title,
+.task-label {
+  margin: 0;
+  font: 700 12px/var(--u) var(--print);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.section-title {
+  margin: calc(var(--u) * 2) 0 calc(var(--u) / 2);
+}
+
+.legend {
+  margin: calc(var(--u) / 2) 0 0;
+  color: var(--pencil);
+  font-size: 14px;
+}
+
+.stamp {
+  display: inline-block;
+  margin: 0 0 var(--u);
+  padding: calc(var(--u) / 4) calc(var(--u) / 2);
+  border: 3px double var(--red);
+  color: var(--red);
+  font: 700 13px/var(--u) var(--print);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transform: rotate(-4deg);
+}
+
+.streak {
+  margin: 0 0 var(--u);
+  color: var(--red);
+  font: 700 27px/var(--u) var(--hand);
+  transform: rotate(-1deg);
+  transform-origin: left bottom;
+}
+
+.warn {
+  margin: 0 0 var(--u);
+  padding: calc(var(--u) / 2);
+  border: 2px dashed var(--red);
+  background: var(--lift);
+  font-size: 14px;
+}
+
+/* ---------- buttons ---------- */
+
+.btn {
+  height: calc(var(--u) * 2);
+  padding: 0 var(--u);
+  border: 2px solid var(--graphite);
+  background: rgba(255, 255, 255, 0.88);
+  font: 700 14px/1 var(--print);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+
+.btn-small {
+  height: calc(var(--u) * 1.5);
+  padding: 0 calc(var(--u) / 2);
+  font-size: 12px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: calc(var(--u) / 2);
+  margin-top: var(--u);
+}
+
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--pencil);
+  font: 400 14px/var(--u) var(--print);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  min-height: calc(var(--u) * 2);
+}
+
+.home-foot {
+  margin-top: var(--u);
+}
+
+/* ---------- the table ---------- */
+
+.ttable {
+  display: grid;
+  grid-template-columns: calc(var(--u) * 5) repeat(3, minmax(0, 1fr));
+  border: 3px solid var(--graphite);
+  background: var(--lift);
+}
+
+.ttable > * {
+  min-width: 0;
+  border: 0 solid var(--graphite);
+  border-right-width: 2px;
+  border-bottom-width: 2px;
+}
+
+.ttable > :nth-child(4n) {
+  border-right-width: 0;
+}
+
+.ttable > :nth-last-child(-n + 4) {
+  border-bottom-width: 0;
+}
+
+.thead {
+  padding: calc(var(--u) / 2) 4px;
+  font: 700 13px/var(--u) var(--print);
+  letter-spacing: 0.14em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.trow {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: calc(var(--u) / 2);
+}
+
+.aux {
+  font: 700 22px/var(--u) var(--print);
+  text-transform: uppercase;
+}
+
+.tense {
+  margin-top: calc(var(--u) / 4);
+  color: var(--pencil);
+  font: 400 11px/calc(var(--u) / 2) var(--print);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tcell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: calc(var(--u) / 4);
+  padding: calc(var(--u) / 2) calc(var(--u) / 2) var(--u);
+  background: none;
+  text-align: left;
+}
+
+.who {
+  display: block;
+  color: var(--pencil);
+  font: 400 11px/calc(var(--u) / 2) var(--print);
+  letter-spacing: 0.04em;
+}
+
+.formula {
+  display: block;
+  color: var(--ink);
+  font: 700 29px / calc(var(--u) * 1.25) var(--hand);
+}
+
+/* Highlighter stroke: covers the letters but not the line above. */
+.k {
+  padding: 0 0.14em;
+  background: linear-gradient(transparent 22%, var(--marker) 22%, var(--marker) 92%, transparent 92%);
+}
+
+.note {
+  display: block;
+  color: var(--pencil);
+  font: italic 400 12px/calc(var(--u) / 2) var(--print);
+}
+
+.mastery {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  display: flex;
+  gap: 3px;
+}
+
+.mastery i {
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--ink);
+}
+
+.mastery i.on {
+  background: var(--ink);
+}
+
+.ttable.is-pick .tcell {
+  min-height: calc(var(--u) * 4);
+  cursor: pointer;
+}
+
+.ttable.is-pick .tense {
+  margin-top: 0;
+  color: var(--graphite);
+  font-weight: 700;
+}
+
+.ttable.is-pick .tcell:active:not(:disabled) {
+  background: var(--marker);
+}
+
+.ttable.is-pick .tcell:disabled {
+  color: inherit;
+  cursor: default;
+}
+
+.tcell.is-right {
+  background: rgba(23, 132, 90, 0.14);
+  box-shadow: inset 0 0 0 3px var(--green);
+}
+
+.tcell.is-wrong {
+  background:
+    linear-gradient(to top right, transparent calc(50% - 1.5px), var(--red) calc(50% - 1.5px), var(--red) calc(50% + 1.5px), transparent calc(50% + 1.5px)),
+    linear-gradient(to bottom right, transparent calc(50% - 1.5px), var(--red) calc(50% - 1.5px), var(--red) calc(50% + 1.5px), transparent calc(50% + 1.5px));
+  box-shadow: inset 0 0 0 3px var(--red);
+}
+
+/* ---------- mini map of the table ---------- */
+
+.mini-wrap {
+  flex: none;
+  margin: 0;
+  color: var(--graphite);
+  transform: none;
+}
+
+.mini {
+  display: grid;
+  grid-template-columns: repeat(4, 20px);
+  width: 81px;
+}
+
+.mini-l {
+  height: 20px;
+  color: var(--pencil);
+  font: 700 11px/20px var(--print);
+  text-align: center;
+}
+
+.mini-c {
+  height: 20px;
+  margin: 0 -1px -1px 0;
+  border: 1px solid var(--graphite);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.mini-c.on {
+  background: var(--marker);
+  box-shadow: inset 0 0 0 2px var(--graphite);
+}
+
+.mini-wrap figcaption {
+  max-width: 120px;
+  margin-top: 6px;
+  font: 400 12px/16px var(--print);
+}
+
+/* ---------- lesson list as a school diary ---------- */
+
+.diary {
+  border: 3px solid var(--graphite);
+  background: var(--lift);
+}
+
+.diary-head,
+.diary-row {
+  display: grid;
+  grid-template-columns: calc(var(--u) * 2) minmax(0, 1fr) calc(var(--u) * 4);
+}
+
+.diary-head {
+  border-bottom: 2px solid var(--graphite);
+  font: 700 11px/var(--u) var(--print);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.diary-head > span,
+.diary-row > span {
+  padding: 0 calc(var(--u) / 2);
+  border-right: 2px solid var(--graphite);
+}
+
+.diary-head > span:last-child,
+.diary-row > span:last-child {
+  border-right: 0;
+}
+
+.diary-row {
+  width: 100%;
+  min-height: calc(var(--u) * 3);
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--graphite);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.diary-row:last-child {
+  border-bottom: 0;
+}
+
+.diary-row > span {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.diary-n {
+  align-items: center;
+  font: 700 18px/var(--u) var(--print);
+}
+
+.diary-title {
+  align-self: flex-start;
+  color: var(--ink);
+  font: 700 31px/calc(var(--u) * 1.25) var(--hand);
+}
+
+.diary-brief {
+  color: var(--pencil);
+  font-size: 14px;
+  line-height: calc(var(--u) * 0.75);
+}
+
+.diary-grade {
+  align-items: center;
+  color: var(--red);
+  font: 700 46px/1 var(--hand);
+}
+
+.diary-grade b {
+  font-weight: 700;
+  transform: rotate(-7deg);
+}
+
+.diary-row:active:not(:disabled) .diary-title {
+  background: var(--marker);
+}
+
+.diary-row:disabled {
+  cursor: not-allowed;
+}
+
+.diary-row:disabled .diary-title {
+  color: var(--ink-faint);
+}
+
+/* ---------- lesson intro ---------- */
+
+.vocab {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(calc(var(--u) * 9), 1fr));
+  gap: 0 var(--u);
+  margin: 0 0 var(--u);
+  padding: 0;
+  list-style: none;
+}
+
+.vocab li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
+  border-bottom: 1px solid var(--grid-strong);
+  line-height: calc(var(--u) * 1.5);
+}
+
+.vocab b,
+.vocab i {
+  font: 700 29px / calc(var(--u) * 1.5) var(--hand);
+}
+
+.vocab b {
+  color: var(--ink);
+}
+
+.vocab i {
+  margin-left: auto;
+  color: var(--red);
+}
+
+.examples {
+  margin: 0 0 var(--u);
+  color: var(--ink);
+  font: 700 31px / calc(var(--u) * 1.5) var(--hand);
+}
+
+/* ---------- play ---------- */
+
+.play-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: calc(var(--u) / 2) var(--u);
+  margin-bottom: var(--u);
+}
+
+.play-tools {
+  display: flex;
+  gap: calc(var(--u) / 2);
+}
+
+.meter {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) / 2);
+  min-height: var(--u);
+  margin-bottom: calc(var(--u) * 2);
+}
+
+.meter-cells {
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pg {
+  flex: 0 1 auto;
+  width: 20px;
+  min-width: 3px;
+  height: 20px;
+  border: 2px solid var(--ink);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.pg.ok {
+  background: var(--ink);
+}
+
+.pg.bad {
+  border-color: var(--red);
+  background:
+    linear-gradient(45deg, transparent 42%, var(--red) 42%, var(--red) 58%, transparent 58%),
+    linear-gradient(-45deg, transparent 42%, var(--red) 42%, var(--red) 58%, transparent 58%),
+    rgba(255, 255, 255, 0.7);
+}
+
+.pg.peek {
+  border-style: dashed;
+  background: var(--marker);
+}
+
+.pg.now {
+  background: var(--marker);
+}
+
+.pg.off {
+  border-color: var(--grid-strong);
+  background: none;
+}
+
+.meter-note {
+  flex: none;
+  color: var(--ink);
+  white-space: nowrap;
+  font: 700 27px/var(--u) var(--hand);
+}
+
+.task-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--u);
+}
+
+.task-label {
+  color: var(--pencil);
+}
+
+.prompt {
+  margin: 0;
+  font: 700 clamp(26px, 5.4vw, 38px) / calc(var(--u) * 2) var(--print);
+}
+
+.prompt-hand {
+  color: var(--ink);
+  font: 700 clamp(42px, 9vw, 62px) / calc(var(--u) * 3) var(--hand);
+}
+
+.verb-chip {
+  margin: 0;
+  color: var(--pencil);
+  font-size: 15px;
+}
+
+.verb-chip b {
+  padding: 0 0.3em;
+  background: var(--marker);
+  color: var(--graphite);
+}
+
+.answer {
+  margin-top: var(--u);
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: calc(var(--u) / 2) var(--u);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) / 2);
+  min-height: calc(var(--u) * 3);
+  padding: 0 calc(var(--u) / 2);
+  border: 2px solid var(--graphite);
+  background: rgba(255, 255, 255, 0.88);
+  font: 700 21px/var(--u) var(--print);
+  text-align: left;
+  cursor: pointer;
+}
+
+.option:active:not(:disabled) {
+  background: var(--marker);
+}
+
+.option:disabled {
+  color: var(--pencil);
+  cursor: default;
+}
+
+.option .key {
+  flex: none;
+  width: var(--u);
+  height: var(--u);
+  border: 1px solid currentColor;
+  font: 400 12px / calc(var(--u) - 2px) var(--print);
+  text-align: center;
+}
+
+.option.is-right {
+  border-color: var(--green);
+  background: rgba(23, 132, 90, 0.12);
+  color: var(--green);
+}
+
+.option.is-wrong {
+  border-color: var(--red);
+  background: rgba(212, 40, 58, 0.08);
+  color: var(--red);
+}
+
+.option.is-wrong .option-text {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.option .pen-tick {
+  margin: 0 0 0 auto;
+  font-size: 28px;
+}
+
+.line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0 0.28em;
+  min-height: calc(var(--u) * 3);
+  padding: 0 4px 2px;
+  border-bottom: 2px solid var(--graphite);
+  color: var(--ink);
+  font: 700 clamp(34px, 7vw, 50px) / calc(var(--u) * 2) var(--hand);
+}
+
+.line:focus-within {
+  border-bottom-color: var(--ink);
+  box-shadow: 0 2px 0 var(--ink);
+}
+
+.line-input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  caret-color: var(--ink);
+}
+
+.line.is-right .line-input,
+.line.is-wrong .line-input {
+  caret-color: transparent;
+}
+
+.type-form {
+  margin: 0;
+}
+
+.line-input::placeholder,
+.line-hint {
+  color: var(--ink-faint);
+  font-weight: 500;
+}
+
+.line-hint {
+  font-size: 0.6em;
+}
+
+.word {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.word:active:not(:disabled) {
+  color: var(--red);
+  text-decoration: line-through;
+}
+
+.word:disabled {
+  color: inherit;
+  cursor: default;
+}
+
+.line.is-wrong > * {
+  color: var(--ink);
+  text-decoration: line-through;
+  text-decoration-color: var(--red);
+  text-decoration-thickness: 3px;
+}
+
+.line.is-right .pen-tick {
+  align-self: center;
+  color: var(--green);
+}
+
+.line.nudge {
+  animation: nudge 0.25s;
+}
+
+.tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--u) / 2);
+  margin-top: var(--u);
+}
+
+.tile {
+  height: calc(var(--u) * 2);
+  padding: 0 calc(var(--u) * 0.75);
+  border: 2px solid var(--ink);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  font: 700 20px/1 var(--print);
+  cursor: pointer;
+}
+
+.tile:active:not(:disabled) {
+  background: var(--marker);
+}
+
+.tile:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* A word that went up into the line leaves an empty slot behind. */
+.tile.is-used {
+  border-style: dashed;
+  border-color: var(--grid-strong);
+  background: none;
+  color: transparent;
+  opacity: 1;
+}
+
+.feedback {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--u);
+  min-height: calc(var(--u) * 4);
+  margin-top: var(--u);
+  font: 700 31px / calc(var(--u) * 1.5) var(--hand);
+}
+
+.feedback p {
+  margin: 0;
+}
+
+.feedback.is-ok {
+  color: var(--green);
+}
+
+.feedback.is-bad {
+  color: var(--red);
+}
+
+.fb-text {
+  transform: rotate(-0.8deg);
+  transform-origin: left top;
+}
+
+.fb-rule {
+  font-size: 26px;
+  font-weight: 500;
+}
+
+.fb-tools .link {
+  color: inherit;
+}
+
+/* ---------- pen strokes ---------- */
+
+.pen {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pen path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 0.35s ease-out forwards;
+}
+
+.pen-tick {
+  flex: none;
+  width: 1em;
+  height: 0.9em;
+  margin-right: 0.2em;
+  vertical-align: -0.08em;
+}
+
+.pen-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  stroke-width: 3;
+}
+
+.pen-ring path {
+  animation-duration: 0.7s;
+  animation-delay: 0.15s;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes nudge {
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+
+/* ---------- result ---------- */
+
+.result-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--u) calc(var(--u) * 2);
+  margin: var(--u) 0;
+}
+
+.grade {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: calc(var(--u) * 8);
+  height: calc(var(--u) * 8);
+  color: var(--red);
+  transform: rotate(-5deg);
+}
+
+.grade-n {
+  font: 700 128px/1 var(--hand);
+}
+
+.verdict {
+  margin: 0 0 calc(var(--u) / 2);
+  color: var(--red);
+  font: 700 42px / calc(var(--u) * 2) var(--hand);
+  transform: rotate(-1deg);
+  transform-origin: left;
+}
+
+.result-top .lead {
+  margin: 0;
+}
+
+.mistakes {
+  margin: 0;
+  padding: 0;
+  border-top: 2px solid var(--graphite);
+  list-style: none;
+}
+
+.mistakes li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  align-items: baseline;
+  gap: 0 var(--u);
+  padding: calc(var(--u) / 2) 0;
+  border-bottom: 1px solid var(--graphite);
+}
+
+.m-right {
+  display: block;
+  color: var(--green);
+  font: 700 29px/var(--u) var(--hand);
+}
+
+.m-given {
+  display: block;
+  color: var(--red);
+  font: 500 23px/var(--u) var(--hand);
+  text-decoration: line-through;
+}
+
+/* ---------- peek dialog ---------- */
+
+.peek {
+  width: min(100% - var(--u) * 2, var(--u) * 36);
+  padding: var(--u);
+  border: 3px solid var(--graphite);
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: var(--u) var(--u);
+  color: var(--graphite);
+}
+
+.peek::backdrop {
+  background: rgba(18, 36, 30, 0.72);
+}
+
+/* ---------- pointers ---------- */
+
+/* Hover belongs to the mouse: on a touch screen it sticks to the last tapped button. */
+@media (hover: hover) {
+  .btn:hover:not(:disabled),
+  .option:hover:not(:disabled),
+  .tile:hover:not(:disabled),
+  .ttable.is-pick .tcell:hover:not(:disabled),
+  .diary-row:hover:not(:disabled) .diary-title {
+    background: var(--marker);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    border-color: var(--ink-deep);
+    background: var(--ink-deep);
+  }
+
+  .word:hover:not(:disabled) {
+    color: var(--red);
+    text-decoration: line-through;
+  }
+}
+
+/* The digit hints are for a keyboard. */
+@media (hover: none) {
+  .option .key {
+    display: none;
+  }
+}
+
+/* ---------- small screens ---------- */
+
+@media (max-width: 680px) {
+  :root {
+    --u: 20px;
+  }
+
+  .sheet {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0;
+    padding: var(--u) var(--u) calc(var(--u) * 3 + var(--kb, 0px));
+    padding:
+      max(var(--u), env(safe-area-inset-top))
+      max(var(--u), env(safe-area-inset-right))
+      calc(var(--u) * 3 + env(safe-area-inset-bottom) + var(--kb, 0px))
+      max(var(--u), env(safe-area-inset-left));
+    box-shadow: none;
+  }
+
+  .sheet::before {
+    display: none;
+  }
+
+  .topbar {
+    gap: calc(var(--u) / 2);
+    margin-bottom: calc(var(--u) / 2);
+  }
+
+  /* Finger-sized targets. */
+  .btn,
+  .btn-small,
+  .tile {
+    height: 44px;
+  }
+
+  .btn-small {
+    font-size: 11px;
+  }
+
+  .cover-label,
+  .toggle,
+  .link {
+    min-height: 44px;
+  }
+
+  .cover-label {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  .toggles {
+    gap: calc(var(--u) / 2);
+  }
+
+  .toggle {
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .ttable {
+    grid-template-columns: calc(var(--u) * 3) repeat(3, minmax(0, 1fr));
+  }
+
+  .thead {
+    padding: 4px 2px;
+    font-size: 9px;
+    letter-spacing: 0.03em;
+  }
+
+  .trow {
+    padding: 4px;
+  }
+
+  .aux {
+    font-size: 14px;
+  }
+
+  .tense {
+    font-size: 9px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .tcell {
+    padding: 6px 4px var(--u);
+  }
+
+  .who {
+    font-size: 8px;
+    letter-spacing: 0;
+  }
+
+  .formula {
+    font-size: 20px;
+  }
+
+  .note {
+    font-size: 10px;
+  }
+
+  .ttable.is-pick .tcell {
+    min-height: calc(var(--u) * 5);
+  }
+
+  .diary-head,
+  .diary-row {
+    grid-template-columns: calc(var(--u) * 2) minmax(0, 1fr) calc(var(--u) * 3);
+  }
+
+  .diary-head {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+  }
+
+  .diary-head > span,
+  .diary-row > span {
+    padding: 0 calc(var(--u) / 4);
+  }
+
+  .diary-title {
+    font-size: 27px;
+  }
+
+  .diary-grade {
+    font-size: 38px;
+  }
+
+  .play-head {
+    flex-wrap: nowrap;
+    margin-bottom: calc(var(--u) / 2);
+  }
+
+  .play-head .eyebrow {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .play-tools {
+    flex: none;
+  }
+
+  .meter {
+    margin-bottom: var(--u);
+  }
+
+  .meter-cells {
+    gap: 3px;
+  }
+
+  .meter-cells.is-clock {
+    gap: 2px;
+  }
+
+  .pg {
+    height: 16px;
+    border-width: 1px;
+  }
+
+  .meter-note {
+    font-size: 24px;
+  }
+
+  /* The main button sits right under the answer, the teacher's note below it:
+     with the keyboard open there is no room to hunt for "next". */
+  .stage {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stage > .answer,
+  .stage > .actions,
+  .stage > .feedback {
+    margin-top: calc(var(--u) * 0.75);
+  }
+
+  .stage > .actions {
+    order: 1;
+  }
+
+  .stage > .actions:empty {
+    display: none;
+  }
+
+  .stage > .feedback {
+    order: 2;
+    min-height: 0;
+  }
+
+  .stage .actions .btn {
+    flex: 1;
+  }
+
+  .feedback .mini-wrap {
+    display: none;
+  }
+
+  .prompt {
+    font-size: 24px;
+    line-height: calc(var(--u) * 1.5);
+  }
+
+  .line {
+    min-height: calc(var(--u) * 2.5);
+  }
+
+  .tiles {
+    margin-top: calc(var(--u) * 0.75);
+  }
+
+  .actions .btn {
+    flex: 1 1 auto;
+  }
+
+  .peek {
+    width: calc(100% - 16px);
+    max-width: none;
+    max-height: calc(100vh - 16px);
+    max-height: calc(100dvh - 16px);
+    padding: calc(var(--u) / 2);
+  }
+
+  .options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .option {
+    font-size: 19px;
+  }
+
+  .feedback {
+    font-size: 26px;
+  }
+
+  .fb-rule {
+    font-size: 22px;
+  }
+
+  .grade {
+    width: calc(var(--u) * 7);
+    height: calc(var(--u) * 7);
+  }
+
+  .grade-n {
+    font-size: 104px;
+  }
+
+  .mistakes li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pen path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  .line.nudge {
+    animation: none;
+  }
+}

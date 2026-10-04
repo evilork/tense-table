@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Таблица времён</title>
+<meta name="description" content="Тренажёр таблицы английских времён: девять клеток, восемь уроков, блиц и контрольная без подсказок.">
+<meta name="theme-color" content="#f6f8fc" media="(max-width: 680px)">
+<meta name="theme-color" content="#2b5547">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Времена">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" crossorigin>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="sheet">
+  <header class="topbar" data-keep-enter>
+    <button class="cover-label" id="homeBtn" type="button">Тетрадь по английскому</button>
+    <div class="toggles">
+      <button class="toggle" id="voiceBtn" type="button" aria-pressed="true">Голос</button>
+      <button class="toggle" id="soundBtn" type="button" aria-pressed="true">Звук</button>
+    </div>
+  </header>
+  <main id="view"></main>
+  <noscript><p>Игре нужен JavaScript. Включи его в настройках браузера.</p></noscript>
+</div>
+<dialog id="peek" class="peek" aria-label="Таблица времён">
+  <div id="peekBody"></div>
+  <form method="dialog" class="actions">
+    <button class="btn btn-primary" type="submit">Закрыть</button>
+  </form>
+</dialog>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
